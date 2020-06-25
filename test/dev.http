@@ -1,0 +1,6 @@
+POST http://localhost:9000/home/login
+
+{
+   "loginid":"admin",
+    "passwd":"admin"
+}
