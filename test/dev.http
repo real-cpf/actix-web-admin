@@ -1,6 +1,6 @@
 POST http://localhost:9000/home/login
 
 {
-   "loginid":"admin",
-    "passwd":"admin"
+   "loginid":"real_cpf",
+    "passwd":"c2f1aeefcec4"
 }

@@ -16,11 +16,16 @@ pub struct Claims {
     pub id:String,
     pub sub: String,
     pub company: String,
-    pub px:i32,
-    pub py:i32,
+    pub px:i64,
+    pub py:i64,
     pub dept:i16,
     pub iat: i64,
     pub exp: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Token {
+    pub token:String,
 }
 
 #[derive(Serialize, Deserialize,FromRow)]
@@ -53,6 +58,33 @@ impl HomeUser{
         let recs=sqlx::query(r#" SELECT displayname, loginid, rolex, roley, deptid, email FROM public.user_table where loginid =$1 and passwd =$2        "#)
         .bind(u_login.loginid)
         .bind(u_login.passwd)
+        .map(|row: PgRow| {
+            HomeUser {
+                displayname:row.get(0),
+                rolex:row.get(2),
+                roley:row.get(3),
+                passwd:String::from("******"),
+                deptid:row.get(4),
+                email:row.get(5),
+                loginid:row.get(1),
+            }
+         }).fetch_one(pool).await;
+
+         Ok(recs.unwrap_or(HomeUser {
+            displayname:String::from(""),
+            rolex:0_i64,
+            roley:0_i64,
+            passwd:String::from(""),
+            deptid:0_i16,
+            email:String::from(""),
+            loginid:String::from(""),
+        }))
+         
+    }
+
+    pub async fn userinfo(loginid:String,pool :&PgPool)->Result<HomeUser>{
+        let recs=sqlx::query(r#" SELECT displayname, loginid, rolex, roley, deptid, email FROM public.user_table where loginid =$1  "#)
+        .bind(loginid.trim())
         .map(|row: PgRow| {
             HomeUser {
                 displayname:row.get(0),

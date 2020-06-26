@@ -8,7 +8,9 @@ use actix_cors::Cors;
 use sqlx::PgPool;
 use anyhow::Result;
 
+mod utils;
 mod home;
+
 
 // default / handler
 async fn index() -> impl Responder {
@@ -37,15 +39,15 @@ async fn main() -> Result<()> {
     // .wrap(todo::redirect::CheckLogin)
     let mut server = HttpServer::new(move || {
         App::new()
-                .wrap(Cors::new() // <- Construct CORS middleware builder
-                .allowed_origin("http://localhost:9528")
-                .allowed_origin("http://localhost:9000")
-                .allowed_methods(vec!["GET", "POST","PUT"])
-                .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-                .allowed_header(http::header::CONTENT_TYPE)
-                .max_age(3600)
-                .finish()
-            )
+            //     .wrap(Cors::new() // <- Construct CORS middleware builder
+            //     .allowed_origin("http://localhost:9528")
+            //     .allowed_origin("http://localhost:9000")
+            //     .allowed_methods(vec!["GET", "POST","PUT"])
+            //     .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            //     .allowed_header(http::header::CONTENT_TYPE)
+            //     .max_age(3600)
+            //     .finish()
+            // )
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .route("/", web::get().to(index))
             .service(web::scope("/home").configure(home::init))
