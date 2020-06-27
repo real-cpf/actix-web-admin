@@ -1,4 +1,5 @@
 // use crate::todo::{Todo, TodoRequest};
+use crate::middlewares::authorize::UserIdentity;
 use actix_web::{HttpRequest,delete, get, post, put, web, HttpResponse, Responder};
 use sqlx::PgPool;
 use chrono::Utc;
@@ -66,3 +67,9 @@ pub async fn profile( req: HttpRequest,db_pool: web::Data<PgPool>) -> impl Respo
         _ => HttpResponse::BadRequest().body("*")
     }
 }
+
+#[post("/test")]
+pub async fn test( id:UserIdentity) -> impl Responder {
+    HttpResponse::Ok().json(id.claims.id)
+}
+

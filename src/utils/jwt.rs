@@ -43,7 +43,7 @@ pub fn from_token(token:String)->Claims{
 
     let token_data = match decode::<Claims>(_token, &DecodingKey::from_secret(&KEY), &Validation::default()) {
         Ok(c) => c,
-           Err(err) => match *err.kind() {
+        Err(err) => match *err.kind() {
             ErrorKind::InvalidToken => panic!("Token is invalid"), // Example on how to handle a specific error
             ErrorKind::InvalidIssuer => panic!("Issuer is invalid"), // Example on how to handle a specific error
             _ => {

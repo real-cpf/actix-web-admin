@@ -8,6 +8,7 @@ use actix_cors::Cors;
 use sqlx::PgPool;
 use anyhow::Result;
 
+mod middlewares;
 mod utils;
 mod home;
 
