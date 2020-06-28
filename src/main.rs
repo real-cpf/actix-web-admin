@@ -3,6 +3,7 @@ extern crate log;
 use dotenv::dotenv;
 use listenfd::ListenFd;
 use std::env;
+use actix_files as fs;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder,http};
 use actix_cors::Cors;
 use sqlx::PgPool;
@@ -11,7 +12,8 @@ use anyhow::Result;
 mod middlewares;
 mod utils;
 mod home;
-
+mod user;
+mod files;
 
 // default / handler
 async fn index() -> impl Responder {
@@ -19,6 +21,11 @@ async fn index() -> impl Responder {
         Welcome to Index.
     "#
     )
+}
+
+
+pub async fn test0() -> impl Responder {
+    HttpResponse::Ok().json("ok")
 }
 
 
@@ -33,25 +40,34 @@ async fn main() -> Result<()> {
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
     println!("{}",&database_url);
-    // PgPool::builder()
-    //     .max_size(5) // maximum number of connections in the pool
-    //     .build(env::var("DATABASE_URL")?).await?;
-    let db_pool = PgPool::new(&database_url).await?;
+    let db_pool=PgPool::builder()
+        .max_size(5) // maximum number of connections in the pool
+        .build(&database_url).await?;
+    // let db_pool = PgPool::new(&database_url).await?;
+    
     // .wrap(todo::redirect::CheckLogin)
     let mut server = HttpServer::new(move || {
         App::new()
-            //     .wrap(Cors::new() // <- Construct CORS middleware builder
-            //     .allowed_origin("http://localhost:9528")
-            //     .allowed_origin("http://localhost:9000")
-            //     .allowed_methods(vec!["GET", "POST","PUT"])
-            //     .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-            //     .allowed_header(http::header::CONTENT_TYPE)
-            //     .max_age(3600)
-            //     .finish()
-            // )
+                .service(
+                    fs::Files::new("/static", "./static")
+                    .show_files_listing()
+                    .use_last_modified(true),
+                )
+                .wrap(
+                    Cors::new() // <- Construct CORS middleware builder
+                .allowed_origin("http://localhost:9528")
+                .allowed_origin("http://localhost:9000")
+                .allowed_methods(vec!["GET", "POST","PUT"])
+                .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+                .allowed_header(http::header::CONTENT_TYPE)
+                .max_age(3600)
+                .finish()
+            )
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .route("/", web::get().to(index))
+            .route("/test0", web::post().to(test0))
             .service(web::scope("/home").configure(home::init))
+            .service(web::scope("/files").configure(files::init))
     });
 
     server = match listenfd.take_tcp_listener(0)? {

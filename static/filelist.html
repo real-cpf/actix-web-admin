@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>filelist</title>
+</head>
+<script>
+   
+    fetch('http://localhost:9000/files/list',{
+        method:'GET'
+    })
+    .then(response => response.json())
+    .then(
+        data=>{
+            let filelist=data
+            let fs=document.getElementById('filelist')
+            filelist.forEach(element => {
+                
+                fs.innerHTML+='<button onclick="download('+element.id+')">'+element.filename+'</button> <br>'
+            });
+        })
+    .catch(e=>console.error("error:",e))
+
+        
+        
+</script>
+<body>
+   
+    <div id="filelist">
+
+    </div>
+
+
+    <form action="http://localhost:9000/files/upload" method="post" enctype="multipart/form-data">
+        <input type="file" multiple name="file"/>
+        <input type="submit" value="Submit"></button>
+    </form>
+    <script>
+        // 二进制文件类型需要设置 response type 文本类型不需要，现在只能下载文本类型
+        function download(id) {
+            let req={"id":id}
+            fetch('http://localhost:9000/files/download',{
+                body:JSON.stringify(req),
+                method:'POST',
+                headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+                }
+            }) .then(response => response.blob())
+                .then(data=>{
+                    const blob = data;
+                    var a = document.createElement('a'); 
+                    var url = window.URL.createObjectURL(blob); 
+                    var filename = "文件11.txt"; 
+                    a.href = url; 
+                    a.download = filename; 
+                    a.click(); 
+                    window.URL.revokeObjectURL(url);
+                })
+        }
+    </script>
+</body>
+</html>

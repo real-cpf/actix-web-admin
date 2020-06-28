@@ -73,3 +73,25 @@ pub async fn test( id:UserIdentity) -> impl Responder {
     HttpResponse::Ok().json(id.claims.id)
 }
 
+
+
+#[post("/test1")]
+pub async fn test1( req: HttpRequest) -> impl Responder {
+    let mut loginid=String::from("*");
+    if let Some(ah) = req.headers().get("Authorization") {
+        // let user:Claims=utils::decode_token(ah.to_str().unwrap()).unwrap();
+        match utils::decode_token(ah.to_str().unwrap()){
+            Ok(claims)=>{
+                loginid=claims.id;
+            },
+            Err(e)=>{
+                println!("err:{}",e);
+            }
+        }
+        
+    }
+    HttpResponse::Ok().json(loginid)
+}
+
+
+

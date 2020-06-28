@@ -2,7 +2,7 @@ use crate::{
     home::{Claims,HomeUser,Token},
 };
 use jsonwebtoken::errors::ErrorKind;
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation,errors::Error};
 use chrono::Utc;
 
 /// secret key
@@ -33,6 +33,12 @@ pub fn get_token(user:HomeUser,exp:i64)->Token{
     Token{
         token:_token
     }
+}
+
+pub fn decode_token(token:&str)->Result<Claims,Error>{
+    decode::<Claims>(token, &DecodingKey::from_secret(&KEY), &Validation::default())
+    .map(|data|data.claims)
+
 }
 
 

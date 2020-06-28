@@ -23,16 +23,17 @@ impl FromRequest for UserIdentity {
     type Future = Ready<Result<UserIdentity, Self::Error>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
-
         let token_str=req.headers().get("Authorization")
                         .and_then(|s|s.to_str().ok()).unwrap();
-        println!(":::::{}",token_str.clone());
-        let claims= utils::from_token(String::from(token_str));
-        if !claims.company.is_empty(){
-            return ok(UserIdentity{
-                claims:claims,
-            });
+        match utils::decode_token(token_str){
+            Ok(claims)=>{
+                ok(UserIdentity{
+                    claims:claims,
+                })
+            },
+            Err(e)=>{
+                err(HttpResponse::Unauthorized().into())
+            }
         }
-        err(HttpResponse::Unauthorized().into())
     }
 }

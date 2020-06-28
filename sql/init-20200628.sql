@@ -29,4 +29,14 @@ CREATE TABLE public.user_table (
 	CONSTRAINT user_table_fk FOREIGN KEY (rolex, roley) REFERENCES role_table(rolex, roley)
 );
 
+-- file_table
+
+CREATE TABLE public.file_table (
+	id serial NOT NULL,
+	filename varchar(64) NULL,
+	filepath varchar(128) NOT NULL,
+	filemark varchar(64) NULL,
+	filepower int8 NULL DEFAULT 0,
+	CONSTRAINT file_table_pk PRIMARY KEY (id)
+);
 
