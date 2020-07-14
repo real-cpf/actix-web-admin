@@ -55,6 +55,8 @@ async fn main() -> Result<()> {
                 )
                 .wrap(
                     Cors::new() // <- Construct CORS middleware builder
+                .allowed_origin("http://localhost:8000")
+                .allowed_origin("http://localhost:80")
                 .allowed_origin("http://localhost:9528")
                 .allowed_origin("http://localhost:9000")
                 .allowed_methods(vec!["GET", "POST","PUT"])
@@ -63,12 +65,15 @@ async fn main() -> Result<()> {
                 .max_age(3600)
                 .finish()
             )
+            .wrap(middlewares::CheckLogin)
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .route("/", web::get().to(index))
             .route("/test0", web::post().to(test0))
             .service(web::scope("/home").configure(home::init))
             .service(web::scope("/files").configure(files::init))
-    });
+    }).workers(2);
+
+    
 
     server = match listenfd.take_tcp_listener(0)? {
         Some(listener) => server.listen(listener)?,

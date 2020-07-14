@@ -17,15 +17,29 @@ pub async fn index() -> impl Responder {
     )
 }
 
+///test wasm
+#[derive(Serialize, Deserialize)]
+pub struct UserInfo{
+    pub loginid:String,
+    pub passwd:String,
+}
+
+#[post("/formlogin")]
+pub async fn formlogin() -> impl Responder {
+    let res=UserInfo{
+        loginid:String::from("aaaa"),
+        passwd:String::from("xxxx"),
+    };
+    HttpResponse::Ok().json(res)
+}
+
 
 
 #[post("/login")]
 pub async fn login( login: web::Json<LoginRequest>,db_pool: web::Data<PgPool>) -> impl Responder {
-
     let result = HomeUser::login(login.into_inner(),db_pool.get_ref()).await;
     match result {
         Ok(res) => {
-           
             let tempuser=res.loginid.clone();
             if tempuser.is_empty() {
                 HttpResponse::BadRequest().body("*")
@@ -33,7 +47,6 @@ pub async fn login( login: web::Json<LoginRequest>,db_pool: web::Data<PgPool>) -
                 let token:Token=utils::get_token(res, 60000);
                 HttpResponse::Ok().json(token)
             }
-           
         },
         _ => HttpResponse::BadRequest().body("*")
     }
