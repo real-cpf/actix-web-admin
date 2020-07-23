@@ -23,7 +23,11 @@ pub struct UserInfo{
     pub loginid:String,
     pub passwd:String,
 }
-
+#[post("/formlogin1")]
+pub async fn formlogin1(f: web::Json<UserInfo>) -> impl Responder {
+    let res=f.into_inner();
+    HttpResponse::Ok().json(res)
+}
 #[post("/formlogin")]
 pub async fn formlogin() -> impl Responder {
     let res=UserInfo{
